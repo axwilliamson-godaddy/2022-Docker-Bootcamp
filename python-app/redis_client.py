@@ -41,7 +41,10 @@ def check_redis():
         c.set(name="test", value="test")
         c.get("test")
         c.delete("test")
-        return True
+        print("True")
+        exit(0)
+    
+    exit(1)
 
 
 if __name__ == '__main__':

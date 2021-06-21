@@ -1,0 +1,36 @@
+# The syntax version of docker-compose to use
+version: "3.8"
+
+# Create the network so that our containers can talk to eachother
+networks:
+    redis:
+      name: redis_net
+      driver: bridge
+
+# Create the storage volume for redis
+volumes: 
+    redis_storage:
+        name: redis_storage
+
+# Define our containers
+services:
+
+    # Define redis properties
+    cache:
+        image: 'redis:latest'
+        volumes: 
+            - redis_storage:/data
+        networks:
+            - redis
+
+    # Define python app properties, have it build our image
+    app:
+        build: 
+            context: .
+        networks: 
+            - redis
+        entrypoint: "/bin/sh"
+        tty: yes
+        healthcheck:
+            test: ["CMD", "python", "redis_client.py", "check_redis"] 
+            interval: 3s

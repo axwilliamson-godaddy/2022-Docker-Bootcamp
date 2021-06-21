@@ -334,7 +334,7 @@ redis.exceptions.ConnectionError: Error -2 connecting to redis:6379. Name or ser
 
 What's going on? Well remember how everything is isolated, this is actually a good thing. You need to explicitly tell docker that these containers can communicate with eachother. To do this, we need to create a Docker Network.
 
-## Connect Docker Containers
+### Connect Docker Containers
 
 Create a docker network to act as an network environment for multiple containers.
 
@@ -415,4 +415,119 @@ Hopefully through this exercise you can see that docker can unlock some amazing 
 
 So far it's kind of been a nightmare of cli commands. There has to be a better way right...?
 
-TODO: Last part
+There is! With docker-compose, we can combine everything we've learned so far into a single file that's easier to manage.
+
+Here's what that looks like: 
+
+```bash
+# The syntax version of docker-compose to use
+version: "3.8"
+
+# Create the network so that our containers can talk to eachother
+networks:
+    redis:
+      name: redis_net
+      driver: bridge
+
+# Create the storage volume for redis
+volumes: 
+    redis_storage:
+        name: redis_storage
+
+# Define our containers
+services:
+
+    # Define redis properties
+    cache:
+        image: 'redis:latest'
+        volumes: 
+            - redis_storage:/data
+        networks:
+            - redis
+
+    # Define python app properties, have it build our image
+    app:
+        build: 
+            context: .
+        networks: 
+            - redis
+        entrypoint: "/bin/sh"
+        tty: yes
+        healthcheck:
+            test: ["CMD", "python", "redis_client.py", "check_redis"] 
+            interval: 3s
+```
+
+### docker-compose CLI
+
+The following command will create the network, the volume, both containers (in the background), and the proper links:
+
+```bash
+$ cd python-app
+$ docker-compose up -d --build
+
+...
+Starting redis_app_1   ... done
+Starting redis_cache_1 ... done
+```
+
+Let's check on it! Run the following command to see the status of everything:
+
+```bash
+$ docker-compose ps
+    Name                   Command                  State        Ports  
+------------------------------------------------------------------------
+redis_app_1     /bin/sh                          Up (healthy)           
+redis_cache_1   docker-entrypoint.sh redis ...   Up             6379/tcp
+```
+
+> The `Healthy` status above indicates that the command we defined as the healthcheck is returning without failing.
+
+Now let's run our commands again, this time from inside the container! The following command will attach us to the python container so that we can run the same commands as before.
+
+```bash
+$ docker-compose exec app /bin/sh
+```
+
+Now you are inside of the container, feel free to take a look around. When you are ready, run the `ENTRYPOINT` command:
+
+```
+$ python redis_client.py
+
+NAME
+    redis_client.py
+
+SYNOPSIS
+    redis_client.py COMMAND
+
+COMMANDS
+    COMMAND is one of the following:
+
+     store_data
+
+     get_data
+
+     check_redis
+
+---
+
+$ python redis_client.py check_redis
+
+True
+```
+
+Exit the container context by typing:
+
+```bash
+$ exit
+```
+
+To bring all the containers down, type: 
+
+Exit the container context by typing:
+
+```bash
+$ docker-compose down
+```
+
+As you can see, docker compose drastically reduces development time while allowing the same features as the CLI.
