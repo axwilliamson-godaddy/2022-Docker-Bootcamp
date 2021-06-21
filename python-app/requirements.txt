@@ -1,0 +1,4 @@
+redis==3.5.3
+requests==2.23.0
+pytest==5.4.3
+fire
