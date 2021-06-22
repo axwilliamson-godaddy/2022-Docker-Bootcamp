@@ -1,33 +1,59 @@
 # 2021 Bootcamp CI/CD & Docker (pt. 1)
 
-  * [Introduction to Docker](#introduction-to-docker)
-    + [What is Docker?](#what-is-docker)
-    + [Why use Docker?](#why-use-docker)
-    + [What does a Docker Image look like?](#what-does-a-docker-image-look-like)
-  * [How do I use Docker images?](#how-do-i-use-docker-images)
-    + [Pull the Redis image from Dockerhub (default repository for images)](#pull-the-redis-image-from-dockerhub--default-repository-for-images-)
-    + [Create Redis container](#create-redis-container)
-    + [View Redis in container list](#view-redis-in-container-list)
-    + [Check Redis Logs](#check-redis-logs)
-    + [Store data in Redis](#store-data-in-redis)
-    + [Get data from Redis](#get-data-from-redis)
-    + [Stop Redis container](#stop-redis-container)
-    + [Try to get data again](#try-to-get-data-again)
-    + [Start the stopped Redis container](#start-the-stopped-redis-container)
-    + [Try to get data again (data is preserved)](#try-to-get-data-again--data-is-preserved-)
-    + [Remove Redis container](#remove-redis-container)
-    + [Recreate and see that the data doesn't exist anymore](#recreate-and-see-that-the-data-doesn-t-exist-anymore)
-  * [Using Docker Volumes to preserve container data](#using-docker-volumes-to-preserve-container-data)
-    + [Create Redis data volume](#create-redis-data-volume)
-    + [Recreate Redis container, using a docker volume](#recreate-redis-container--using-a-docker-volume)
-    + [Enter Redis container, using interactive session](#enter-redis-container--using-interactive-session)
-    + [Delete Redis container](#delete-redis-container)
-    + [Recreate the Redis container, using the same docker volume](#recreate-the-redis-container--using-the-same-docker-volume)
-    + [Validate data persistence](#validate-data-persistence)
-  * [Create custom Docker images](#create-custom-docker-images)
-    + [Build our image](#build-our-image)
-  * [Connect Docker Containers](#connect-docker-containers)
-  * [Speeding things up with Docker Compose](#speeding-things-up-with-docker-compose)
+<!-- TOC -->
+
+- [Bootcamp CI/CD & Docker pt. 1](#bootcamp-cicd--docker-pt-1)
+    - [Introduction to Docker](#introduction-to-docker)
+        - [What is Docker?](#what-is-docker)
+        - [Why use Docker?](#why-use-docker)
+        - [What does a Docker Image look like?](#what-does-a-docker-image-look-like)
+    - [How do I use Docker images?](#how-do-i-use-docker-images)
+        - [Pull the Redis image](#pull-the-redis-image)
+        - [Inspect the Redis image](#inspect-the-redis-image)
+    - [Deploying an Open Source image](#deploying-an-open-source-image)
+        - [Create Redis container](#create-redis-container)
+        - [View Redis in container list](#view-redis-in-container-list)
+        - [Check Redis Logs](#check-redis-logs)
+        - [Store data in Redis](#store-data-in-redis)
+        - [Get data from Redis](#get-data-from-redis)
+        - [Stop Redis container](#stop-redis-container)
+        - [Try to get data again](#try-to-get-data-again)
+        - [Start the stopped Redis container](#start-the-stopped-redis-container)
+        - [Try to get data again data is preserved](#try-to-get-data-again-data-is-preserved)
+        - [Remove Redis container](#remove-redis-container)
+        - [Recreate and see that the data doesn't exist anymore](#recreate-and-see-that-the-data-doesnt-exist-anymore)
+    - [Using Docker Volumes to preserve container data](#using-docker-volumes-to-preserve-container-data)
+        - [Create Redis data volume](#create-redis-data-volume)
+        - [Recreate Redis container, using a docker volume](#recreate-redis-container-using-a-docker-volume)
+        - [Enter Redis container, using interactive session](#enter-redis-container-using-interactive-session)
+        - [Delete Redis container](#delete-redis-container)
+        - [Recreate the Redis container, using the same docker volume](#recreate-the-redis-container-using-the-same-docker-volume)
+        - [Validate data persistence](#validate-data-persistence)
+    - [Create custom Docker images](#create-custom-docker-images)
+        - [Build our image](#build-our-image)
+        - [Run our image](#run-our-image)
+            - [Run our image with a different CMD](#run-our-image-with-a-different-cmd)
+        - [Connect Docker Containers](#connect-docker-containers)
+            - [docker network create](#docker-network-create)
+            - [docker network connect](#docker-network-connect)
+            - [docker inspect redis](#docker-inspect-redis)
+            - [docker run --net](#docker-run---net)
+        - [Talking to Redis](#talking-to-redis)
+            - [Run a single command](#run-a-single-command)
+            - [Run a command that creates a shell](#run-a-command-that-creates-a-shell)
+                - [Validate the stored data](#validate-the-stored-data)
+    - [Speeding things up with Docker Compose](#speeding-things-up-with-docker-compose)
+        - [docker-compose files](#docker-compose-files)
+        - [docker-compose cli](#docker-compose-cli)
+            - [docker-compose up](#docker-compose-up)
+            - [docker-compose ps](#docker-compose-ps)
+            - [docker-compose exec](#docker-compose-exec)
+                - [Side note](#side-note)
+                - [Living inside a container](#living-inside-a-container)
+            - [docker-compose down](#docker-compose-down)
+    - [Final Thoughts](#final-thoughts)
+
+<!-- /TOC -->
 
 ## Introduction to Docker
 
@@ -83,7 +109,7 @@ Each image is different in terms of how you configure the specifics for the appl
 
 Let's continue looking at Redis, as it's a very popular and useful key-value store and caching solution.
 
-#### Pull the Redis image
+### Pull the Redis image
 
 All we need to do is type `docker pull REPOSITORY[:TAG]`. What does this syntax mean? Well docker images are stored in repositories, just like code is stored in git repositories. By default, all images are pulled from DockerHub. You are able to create and manage your own image repositories, but we won't go over that. The image repository is required, but the tag isn't and will be defaulted to `latest` if nothing is given for it.
 
@@ -97,7 +123,7 @@ Status: Image is up to date for redis:latest
 docker.io/library/redis:latest
 ```
 
-#### Inspect the Redis image
+### Inspect the Redis image
 
 To view the image details, we just need to type `docker images [REPOSITORY[:TAG]]`. This time, the repository is not required, but we are going to use it to limit our results to the image we want. For example:
 
@@ -282,7 +308,7 @@ $ docker exec -it redis redis-cli GET myname
 
 ## Create custom Docker images
 
-Let's create a container to utilize the code in `python-app/redis_client.py`. Our image is going to look very similar to the one we viewed earlier.
+Let's create a container to utilize the code in `python-app/redis_client.py`. Our image is going to look very similar to the one we viewed earlier. With [Dockerfiles](/python-app/Dockerfile), it's extremely important to put the things that change _least_ at the top, as Docker will build and cache the `layers` it generates from this file. This is so that on subsequent builds, you won't need to wait for the entire command again (unless you explicitly want to run it without cache, which is possible). 
 
 ```Docker
 # Use the small python image, no need for fancy add-ons
@@ -306,6 +332,8 @@ ENTRYPOINT [ "python3", "redis_client.py"]
 
 Using this image, we can build a container that can run our app on almost any machine with that has Docker installed. 
 
+> Question to think about: Why would we copy over the requirements file first, before copying over the rest of the app?
+
 ### Build our image
 
 ```bash
@@ -313,6 +341,8 @@ Using this image, we can build a container that can run our app on almost any ma
 $ docker build -f python-app/Dockerfile -t bootcamp python-app
 ```
 Let's run our code without arguments to see what it can do
+
+### Run our image
 
 ```bash
 $ docker run bootcamp
@@ -333,7 +363,8 @@ COMMANDS
      check_redis
 ```
 
-Alright! Let's just make sure we can connect to Redis with `check_redis`.
+#### Run our image with a different `CMD`
+Alright now that our container is running, let's just make sure we can connect to Redis with `check_redis`.
 
 ```bash
 $ docker run bootcamp check_redis
@@ -346,10 +377,11 @@ $ docker run bootcamp check_redis
 redis.exceptions.ConnectionError: Error -2 connecting to redis:6379. Name or service not known.
 ```
 
-What's going on? Well remember how everything is isolated, this is actually a good thing. You need to explicitly tell docker that these containers can communicate with eachother. To do this, we need to create a Docker Network.
+> Doh! What's going on? Well remember how everything is isolated, this is actually a good thing. You need to explicitly tell docker that these containers can communicate with eachother. To do this, we need to create a Docker Network.
 
 ### Connect Docker Containers
 
+#### docker network create
 Create a docker network to act as an network environment for multiple containers.
 
 ```bash
@@ -358,6 +390,7 @@ $ docker network create bootcamp_net --attachable
 <id>
 ```
 
+#### docker network connect
 Okay now that we have a network, let's attach our redis container to it.
 
 ```bash
@@ -366,6 +399,7 @@ $ docker network connect bootcamp_net redis --alias redis
 ...
 ```
 
+#### docker inspect redis
 Not the greatest output for this command so let's check it manually. 
 
 ```bash
@@ -383,6 +417,7 @@ $ docker inspect redis
 ...
 ```
 
+#### docker run --net
 That's what we're looking for. Okay cool, now we need to run our container with this network as well.
 
 ```bash
@@ -391,8 +426,10 @@ $ docker run --net bootcamp_net bootcamp check_redis
 True
 ```
 
+### Talking to Redis
 Yay! Now we can connect to redis from our other container. Let's check on that data from earlier:
 
+#### Run a single command
 ```bash
 $ docker run -t --net  bootcamp_net bootcamp get_data myname
 
@@ -401,6 +438,7 @@ key='myname'
 val='Andrew'
 ```
 
+#### Run a command that creates a shell
 We can also store new data using an interactive shell (`-i`):
 
 ```bash
@@ -413,6 +451,7 @@ potato
 The data has been stored in redis
  ```
 
+##### Validate the stored data
 Now let's check for that new data:
 
 ```bash
@@ -423,7 +462,7 @@ key='thebestfood'
 val='potato'
 ```
 
-Hopefully through this exercise you can see that docker can unlock some amazing development power, while remaining a secure platform to build and run containers from.
+> Hopefully through this exercise you can see that docker can unlock some amazing development power, while remaining a secure platform to build and run containers from.
 
 ## Speeding things up with Docker Compose
 
@@ -567,4 +606,19 @@ Exit the container context by typing:
 $ docker-compose down
 ```
 
-As you can see, docker compose drastically reduces development time while allowing the same features as the CLI.
+> As you can see, docker compose drastically reduces development time while allowing the same features as the CLI.
+
+## Final Thoughts
+
+By going through this excercise, you should have a better idea of what Docker is and what kinds of things you can do with it. There is so much more to explore, here are just a few things that i've found fun while working with it:
+
+- You can run Docker inside Docker (woah).
+  - Very useful for CI/CD, since the runner can be containerized but it can also create other containers.
+- Orchestrating container deployments with docker-compose using docker-swarm.
+- *Using PyCharm to have your default interpreter be inside of a container*
+  - Allows for a clean development environment on ever build
+  - Debugging features still work
+  - Easily test across python versions, by using a different base image for each build/test
+  - More info: https://www.jetbrains.com/help/pycharm/using-docker-compose-as-a-remote-interpreter.html
+
+I strongly believe that containers are the future, so this knowledge is going to be foundational before long. Any time you need a new software service, application, development environment, cicd runners, etc. just think `what i'm doing is probably a container, and it'll be easier to just use the container`.
