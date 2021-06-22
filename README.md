@@ -1,11 +1,10 @@
 # 2021 Bootcamp CI/CD & Docker (pt. 1)
 
-- [2021 Bootcamp CI/CD & Docker (pt. 1)](#2021-bootcamp-ci-cd---docker--pt-1-)
   * [Introduction to Docker](#introduction-to-docker)
-    + [What is Docker?](#what-is-docker-)
-    + [Why use Docker?](#why-use-docker-)
-    + [What does a Docker Image look like?](#what-does-a-docker-image-look-like-)
-  * [How do I use Docker images?](#how-do-i-use-docker-images-)
+    + [What is Docker?](#what-is-docker)
+    + [Why use Docker?](#why-use-docker)
+    + [What does a Docker Image look like?](#what-does-a-docker-image-look-like)
+  * [How do I use Docker images?](#how-do-i-use-docker-images)
     + [Pull the Redis image from Dockerhub (default repository for images)](#pull-the-redis-image-from-dockerhub--default-repository-for-images-)
     + [Create Redis container](#create-redis-container)
     + [View Redis in container list](#view-redis-in-container-list)
@@ -82,11 +81,13 @@ CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
 
 Each image is different in terms of how you configure the specifics for the application running inside. What's common though, is _how_ you configure the containers. Most images are configured using environment variables and/or by mounting a local Docker volume with configuration files present. 
 
-Let's continue looking at Redis, as it's a very popular and useful key-value store.
+Let's continue looking at Redis, as it's a very popular and useful key-value store and caching solution.
 
-### Pull the Redis image from Dockerhub (default repository for images)
+#### Pull the Redis image
+
+All we need to do is type `docker pull REPOSITORY[:TAG]`. What does this syntax mean? Well docker images are stored in repositories, just like code is stored in git repositories. By default, all images are pulled from DockerHub. You are able to create and manage your own image repositories, but we won't go over that. The image repository is required, but the tag isn't and will be defaulted to `latest` if nothing is given for it.
+
 ```bash
-# Pull the open-source image, the syntax is 'image_name:image_tag' where 'latest' is the default 'image_tag'.
 $ docker pull redis
 
 Using default tag: latest
@@ -95,6 +96,19 @@ Digest: sha256:7e2c6181ad5c425443b56c7c73a9cd6df24a122345847d1ea9bb86a5afc76325
 Status: Image is up to date for redis:latest
 docker.io/library/redis:latest
 ```
+
+#### Inspect the Redis image
+
+To view the image details, we just need to type `docker images [REPOSITORY[:TAG]]`. This time, the repository is not required, but we are going to use it to limit our results to the image we want. For example:
+
+```bash
+$ docker images redis
+
+REPOSITORY   TAG       IMAGE ID       CREATED       SIZE
+redis        latest    fad0ee7e917a   2 weeks ago   105MB
+```
+
+## Deploying an Open Source image
 
 ### Create Redis container
 ```bash
@@ -416,8 +430,11 @@ Hopefully through this exercise you can see that docker can unlock some amazing 
 So far it's kind of been a nightmare of cli commands. There has to be a better way right...?
 
 There is! With docker-compose, we can combine everything we've learned so far into a single file that's easier to manage.
+### docker-compose files
 
-Here's what that looks like: 
+The `docker-compose.yml` file has it's own syntax, syntax verions, and a [ton of useful tools](https://docs.docker.com/compose/compose-file/compose-file-v3/) that we won't have time to go over here.
+
+Here's what [a docker-compose.yml file](/python-app/docker-compose.yml) looks like: 
 
 ```bash
 # The syntax version of docker-compose to use
@@ -458,8 +475,9 @@ services:
             interval: 3s
 ```
 
-### docker-compose CLI
+### docker-compose cli
 
+#### docker-compose up
 The following command will create the network, the volume, both containers (in the background), and the proper links:
 
 ```bash
@@ -471,6 +489,7 @@ Starting redis_app_1   ... done
 Starting redis_cache_1 ... done
 ```
 
+#### docker-compose ps
 Let's check on it! Run the following command to see the status of everything:
 
 ```bash
@@ -483,12 +502,29 @@ redis_cache_1   docker-entrypoint.sh redis ...   Up             6379/tcp
 
 > The `Healthy` status above indicates that the command we defined as the healthcheck is returning without failing.
 
-Now let's run our commands again, this time from inside the container! The following command will attach us to the python container so that we can run the same commands as before.
+#### docker-compose exec
+Now let's run our commands again, this time from inside the container! The following command will attach us to the python container so that we can run the same commands as before. We read this command like so: `docker execute <service_name> <command_inside_container>`.
 
 ```bash
 $ docker-compose exec app /bin/sh
 ```
 
+##### Side note
+
+Most docker-contains have some type of shell that you can use to run commands with. In this case, the command we want to run will open up a new shell instance `/bin/sh` and attach us to it so that it acts as our new shell. When we are done, we exit it with `exit`. You could replace `/bin/sh` with any valid executable in the `$PATH` environment variable. For example, listing the files in the `WORKDIR` directory of a container:
+
+```bash
+
+$ docker-compose exec app ls -lrt
+
+total 16
+-rw-r--r-- 1 root root   48 Jun 21 18:56 requirements.txt
+-rw-r--r-- 1 root root  361 Jun 21 20:46 Dockerfile
+-rw-r--r-- 1 root root  797 Jun 21 23:04 docker-compose.yml
+-rw-r--r-- 1 root root 1094 Jun 21 23:06 redis_client.py
+```
+
+##### Living inside a container
 Now you are inside of the container, feel free to take a look around. When you are ready, run the `ENTRYPOINT` command:
 
 ```
@@ -522,6 +558,7 @@ Exit the container context by typing:
 $ exit
 ```
 
+#### docker-compose down
 To bring all the containers down, type: 
 
 Exit the container context by typing:
