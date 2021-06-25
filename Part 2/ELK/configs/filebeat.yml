@@ -1,0 +1,19 @@
+
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
+      hints.default_config:
+        type: container
+        paths:
+          - /var/log/containers/*-${data.container.id}.log
+
+processors:
+- add_docker_metadata: ~
+
+output.elasticsearch:
+  hosts: ['elasticsearch:9200']
+
+setup.ilm.enabled: auto
+setup.ilm.rollover_alias: "filebeat"
+setup.ilm.pattern: "{now/d}-000001"
