@@ -52,7 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
+
 ]
 
 ROOT_URLCONF = 'djangobootcamp.urls'
@@ -135,13 +135,21 @@ STATIC_ROOT = '/code/static'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': True,
+    'disable_existing_loggers': False,
     'formatters': {
+        'default': {
+            'format': '[DJANGO] %(levelname)s %(asctime)s %(module)s '
+            '%(name)s.%(funcName)s:%(lineno)s: %(message)s'
+        },
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
         },
+        "json": {
+            '()': 'json_log_formatter.JSONFormatter',
+        }
     },
     'handlers': {
         'elasticapm': {
@@ -152,6 +160,11 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
+        },
+        'json': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'json'
         }
     },
     'loggers': {
@@ -171,5 +184,15 @@ LOGGING = {
             'handlers': ['console'],
             'propagate': False,
         },
+        'django.server': {
+            'level': 'DEBUG',
+            'handlers': ['json'],
+            'propagate': False,
+        },
+        '': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        }
     },
 }
