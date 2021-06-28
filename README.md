@@ -68,12 +68,12 @@ In their own words:
 
 Essentially, 
 
-- Docker is a tool that allows you to package code into a re-usable Docker image. 
+- Docker is a tool that allows you to package code into a Docker image (a re-usable file used to execute code in a Docker container).
 - Docker images are the blueprint for Docker containers, which are isolated execution environments.
 
 ### Why use Docker?
 
-- Docker a standard package that works across multiple architectures and environment type. i.e. Build a single Docker image that would run the same on Windows vs Mac. 
+- Docker is a standard package that works across multiple architectures and environment type. i.e. Build a single Docker image that would run the same on Windows vs Mac. 
 - Integrate with popular [open-source solutions](https://hub.docker.com/search?q=&type=image) for databases, caching, monitoring, gaming, and more.
 - Since each container is isolated by default, the security from Docker can be unparallelled. For example, consider a web appliction that runs inside of a container. If the application was compriomised by bad actors, they'd only have access to the contents of the container, and not the entire host filesystem.
 - [So much more...](https://www.docker.com/use-cases)
@@ -83,30 +83,30 @@ Essentially,
 Let's take a look at the [Docker docs](https://docs.docker.com/language/python/build-images/#create-a-dockerfile-for-python) for creating a `Dockerfile` for a python application.
 
 ```Docker
-# What is our base image? Since we want to create a python application, we need a base image that has python. Luckily, we can continue making use of open-source images for this as well. There are many types of images that provide python, but for this example i'll choose 
 FROM python:3.8-slim-buster
+# What is our base image? Since we want to create a python application, we need a base image that has python. Luckily, we can continue making use of open-source images for this as well. There are many types of images that provide python, but for this example i'll choose 
 
-# What directory (inside the container) should we be working from?
 WORKDIR /app
+# What directory (inside the container) should we be working from?
 
-# Copy over the project requirements
 COPY requirements.txt requirements.txt
+# Copy over the project requirements
 
-# Run a command to install the requirements
 RUN pip3 install -r requirements.txt
+# Run a command to install the requirements
 
-# Copy over the rest of the app
 COPY . .
+# Copy over the rest of the app
 
-# What should the main command of this container be? If this command exits, the container exits.
 CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
+# What should the main command of this container be? If this command exits, the container exits.
 ```
 
 ## How do I use Docker images?
 
 Each image is different in terms of how you configure the specifics for the application running inside. What's common though, is _how_ you configure the containers. Most images are configured using environment variables and/or by mounting a local Docker volume with configuration files present. 
 
-Let's continue looking at Redis, as it's a very popular and useful key-value store and caching solution.
+Let's look at Redis, as it's a very popular and useful key-value store and caching solution.
 
 ### Pull the Redis image
 
@@ -218,6 +218,8 @@ $ docker exec -it redis redis-cli GET myname
 
 Finally, remove the container which will destroy the data inside of redis and remove the container from `docker ps`.
 
+> remember to stop the container before attempting to removing!
+
 ```bash
 $ docker rm redis
 
@@ -232,7 +234,7 @@ $ docker run --rm --name redis -d redis:latest && docker exec -it redis redis-cl
 (nil)
 ```
 
-## Using Docker Volumes to preserve container data
+## Using [Docker Volumes](https://docs.docker.com/storage/volumes/) to preserve container data
 
 In modern container orchestration technologies such as Kubernetes or Docker-Swarm, it's extremely common for containers to be removed and replaced with a different container. These two containers will have different ids, but they run the same application. As we just saw, when a container is removed it's data is also removed... so how can we make sure that the Redis data isn't deleted when the container is deleted?
 
