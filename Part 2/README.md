@@ -1,5 +1,44 @@
 # 2021 Bootcamp CI/CD & Docker (pt. 2)
 
+<!-- TOC -->
+
+- [Bootcamp CI/CD & Docker pt. 2](#bootcamp-cicd--docker-pt-2)
+    - [The Power of Docker](#the-power-of-docker)
+        - [docker-compose refresher](#docker-compose-refresher)
+    - [Advanced Docker Compose Example](#advanced-docker-compose-example)
+        - [Step 1: Create Django Project](#step-1-create-django-project)
+            - [Deploy Django Service](#deploy-django-service)
+            - [Exec into Django](#exec-into-django)
+            - [Create a Poll](#create-a-poll)
+            - [Create some answers](#create-some-answers)
+            - [Exit the shell](#exit-the-shell)
+            - [Recap](#recap)
+        - [Step 2: Deploy the Elastic Stack](#step-2-deploy-the-elastic-stack)
+            - [What is the Elastic Stack?](#what-is-the-elastic-stack)
+                - [Elasticsearch](#elasticsearch)
+                - [Kibana](#kibana)
+                - [Elastic-APM](#elastic-apm)
+                - [Filebeat](#filebeat)
+            - [Deploy the Elastic Stack](#deploy-the-elastic-stack)
+                - [Use the Elastic Stack](#use-the-elastic-stack)
+        - [Step 3: Tie Application Performance Metrics APM into Django](#step-3-tie-application-performance-metrics-apm-into-django)
+            - [Using Override Files](#using-override-files)
+        - [Step 4: Use the Django Site to generate some Transactions](#step-4-use-the-django-site-to-generate-some-transactions)
+        - [Step 5: Dive into APM](#step-5-dive-into-apm)
+    - [Using docker-compose override files to perform testing](#using-docker-compose-override-files-to-perform-testing)
+    - [Challenges](#challenges)
+        - [Challenge 1: Run the tests using a docker-compose exec command](#challenge-1-run-the-tests-using-a-docker-compose-exec-command)
+        - [Challenge 2: Run the Django site on a different local port 8001](#challenge-2-run-the-django-site-on-a-different-local-port-8001)
+        - [Challenge 3: Send the Database Logs to Elasticsearch](#challenge-3-send-the-database-logs-to-elasticsearch)
+    - [Wrapping up](#wrapping-up)
+        - [Clean up the environments](#clean-up-the-environments)
+            - [Clean Django](#clean-django)
+            - [Clean the Elastic Stack](#clean-the-elastic-stack)
+        - [Fun Docker Containers](#fun-docker-containers)
+        - [Final Thought](#final-thought)
+
+<!-- /TOC -->
+
 In Part 1, you learned about:
 
 - Docker Images
