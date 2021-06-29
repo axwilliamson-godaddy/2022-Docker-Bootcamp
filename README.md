@@ -8,6 +8,7 @@
         - [Why use Docker?](#why-use-docker)
         - [What does a Docker Image look like?](#what-does-a-docker-image-look-like)
     - [How do I use Docker images?](#how-do-i-use-docker-images)
+        - [Install Docker](#install-docker)
         - [Pull the Redis image](#pull-the-redis-image)
         - [Inspect the Redis image](#inspect-the-redis-image)
     - [Deploying an Open Source image](#deploying-an-open-source-image)
@@ -108,6 +109,35 @@ CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
 Each image is different in terms of how you configure the specifics for the application running inside. What's common though, is _how_ you configure the containers. Most images are configured using environment variables and/or by mounting a local Docker volume with configuration files present. 
 
 Let's continue looking at Redis, as it's a very popular and useful key-value store and caching solution.
+
+### Install Docker
+To [install Docker](https://docs.docker.com/docker-for-mac/install/), download the DMG file from: https://desktop.docker.com/mac/stable/amd64/Docker.dmg
+
+From their docs:
+
+1. Double-click `Docker.dmg` to open the installer, then drag the Docker icon to
+    the Applications folder.
+
+      ![Install Docker app](https://docs.docker.com/docker-for-mac/images/docker-app-drag.png)
+
+2. Double-click `Docker.app` in the Applications folder to start Docker. (In the example below, the Applications folder is in "grid" view mode.)
+
+    ![Docker app in Hockeyapp](https://docs.docker.com/docker-for-mac/images/docker-app-in-apps.png)
+
+    The Docker menu in the top status bar indicates that Docker Desktop is running, and accessible from a terminal.
+
+      ![Whale in menu bar](https://docs.docker.com/docker-for-mac/images/whale-in-menu-bar.png)
+
+    If you've just installed the app, Docker Desktop launches the onboarding tutorial. The tutorial includes a simple exercise to build an example Docker image, run it as a container, push and save the image to Docker Hub.
+
+    ![Docker Quick Start tutorial](https://docs.docker.com/docker-for-mac/images/docker-tutorial-mac.png)
+
+3. Click the Docker menu (![whale menu](https://docs.docker.com/docker-for-mac/images/whale-x.png)) to see
+**Preferences** and other options.
+
+4. Select **About Docker** to verify that you have the latest version.
+
+Congratulations! You are now successfully running Docker Desktop.
 
 ### Pull the Redis image
 
