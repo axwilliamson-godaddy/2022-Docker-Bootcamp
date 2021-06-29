@@ -3,7 +3,6 @@ version: "3.9"
 services:
   web:
     environment:
-      DEBUG: "false"
       ELASTIC_APM_SERVER_URL: "http://apm-server:8200"
       ELASTIC_APM_ENABLED: "true"
       ELASTIC_APM_SECRET_TOKEN: ""

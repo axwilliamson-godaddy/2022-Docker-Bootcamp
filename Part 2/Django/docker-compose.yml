@@ -3,6 +3,8 @@ version: "3.9"
 services:
   db:
     image: postgres
+    labels:
+      co.elastic.logs/enabled: true
     volumes:
       - ./data/db:/var/lib/postgresql/data
     environment:
@@ -22,6 +24,6 @@ services:
       ELASTIC_APM_ENABLED: "false"
       ELASTIC_APM_SERVICE_NAME: bootcamp-django
     ports:
-      - "8000:8000"
+      - "8001:8000"
     depends_on:
       - db

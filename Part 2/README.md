@@ -211,7 +211,7 @@ filebeat           /usr/local/bin/docker-entr ...   Up
 kib                /usr/local/bin/dumb-init - ...   Up (health: starting)   0.0.0.0:5601->5601/tcp,:::5601->5601/tcp
 ```
 
-> See how the above logs show `healthy` for some of the services? That's beacuse these services have a `HEALTHCHECK` defined. This allows you to make sure that the individual containers in your services are working as you expect.
+> See how the above logs show `healthy` for some of the services? That's because these services have a `HEALTHCHECK` defined. This allows you to make sure that the individual containers in your services are working as you expect.
 
 ##### Use the Elastic Stack
 
@@ -220,22 +220,281 @@ You should now see your application logs from Django when you visit: http://loca
 When you perform actions on the website, such as going to a new page, you'll see those actions reflected in the logs in Kibana.
 
 This is pretty cool, but what else can we do with Kibana?
+### Step 3: Tie Application Performance Metrics (APM) into Django
 
-##### 
+To do this, we are going to introduce the concepts of a docker-compose override.
 
-### Step 3: 
+> What does an override do? Well it allows you to override specific properties in the main docker-compose.yml file. Why would we want to do this? There are a lot of reasons to use override files, but we are going to focus on one for this session.
 
-```bash
-$ 
+- Use override files to define environment properties 
+    - For example, consider a development environment with dev, test, and prod servers. 
+        - docker-compose.dev.yml
+        - docker-compose.test.yml
+        - docker-compose.prod.yml
+    - The various override files for the environments would contain differentiating config options. These files might include overrides for the environment variables sent to the application, which networks to use, which volumes to use, etc.
 
 
+In this example, we have a file called [docker-compose.apm.yml](Django/docker-compose.apm.yml). 
 
+```yml
+version: "3.9"
+   
+services:
+  web:
+    environment:
+      ELASTIC_APM_SERVER_URL: "http://apm-server:8200"
+      ELASTIC_APM_ENABLED: "true"
+      ELASTIC_APM_SECRET_TOKEN: ""
+      ELASTIC_APM_DEBUG: "true"
+    networks: 
+        - elk_elastic
+  db:
+    networks: 
+        - elk_elastic
+
+networks: 
+    elk_elastic:
+        external: true
 ```
 
-### Docker-Compose Overrides
+This file provides the following overrides:
+- Configure Elastic APM using environment variables to define the config
+- Add Django + DB to the docker network for Elasticsearch
+- Tells docker that the definition and creation of the `elk_elastic` network happens elsewhere
 
-### Clean Development Environments using Docker
+#### Using Override Files
 
-### Monitoring using Docker
+First, let's go back to the directory for Django
 
-## 
+```bash
+$ cd ../Django
+```
+
+Now all we need to do to use an override file is to include the path in our `docker-compose` command.
+
+```bash
+$ docker-compose -f docker-compose.yml -f docker-compose.apm.yml up -d
+
+...
+Recreating django_db_1 ... done
+Recreating django_web_1 ...
+```
+
+> Note: The default name of the docker-compose override file is `docker-compose.override.yml`. If you include a file with this name in the same directory as the normal docker-compose.yml, it'll automatically be included in the up command. In this case though, we don't want it automatically included, so we will specify it directly.
+
+That's it! Now Django is setup to use APM for monitoring the performance of the codebase. 
+
+To view your APM transactions, simply head to the [APM section](http://localhost:5601/app/apm#/services/bootcamp-django/transactions?rangeFrom=now-30m&rangeTo=now&refreshInterval=0&refreshPaused=true&transactionType=request) in Kibana. If you made some requests to Django, it should look something like the following:
+
+![APM Overview](docs/apm-overview.png)
+### Step 4: Use the Django Site to generate some Transactions
+
+Let's create a poll using the admin interface in Django.
+
+- Create a poll with the admin interface: http://0.0.0.0:8000/admin/polls/question/
+![APM Overview](docs/admin-interface-poll.png) 
+
+- After it's created, you'll see the web transactions used to make this request. ![APM Overview](docs/apm-after-admin.png)  
+
+### Step 5: Dive into APM
+
+Now that we have some transactions, let's dive into one of the transaction categories to learn more information about that request. If you followed the above guide to create a poll using the admin interface, you should have a transaction called `POST django.contrib.admin.options.add_view`. Click on that transaction and you are brought to a page like this:
+
+![APM Overview](docs/post-apm-1.png)  
+
+This is a really cool timeline view of the various transactions that have happened in the duration of the time selector in the top right.
+
+Click on a transaction and you'll get a waterfall overview of the tasks that the Django application took in order to render the website. These include things like db lookups, computational tasks, and the rendering of the various web elements.
+
+![APM Overview](docs/post-apm-2.png)
+
+Using APM, we allow for really powerful analysis into the performance of your application. When running large-scale deployments in production, APM provides insights that developers could only dream of 5-10+ years ago.
+
+## Using docker-compose override files to perform testing
+
+Consider the very simple [docker-compose.tests.yml](Django/docker-compose.tests.yml)
+
+```yml
+version: "3.9"
+   
+services:
+  web:
+    entrypoint: "python manage.py test"
+```
+
+All this override file is doing is telling the web container that we want to run tests instead of the default entrypoint command (defined in the `Dockerfile`). This allows us to completely change what the container's function is. Instead of running the Django app, we are now just going to run tests!
+
+```bash
+$ docker-compose -f docker-compose.yml -f docker-compose.tests.yml up --exit-code-from=web web
+
+...
+web_1  | ..........
+web_1  | ----------------------------------------------------------------------
+web_1  | Ran 10 tests in 0.155s
+web_1  | 
+web_1  | OK
+web_1  | Destroying test database for alias 'default'...
+```
+
+That's all it took to run the tests! Which provides us the foundation for Continuous Integration (the CI part of CI/CD). If we hooked this test command into an automated system like Jenkins, we'd be able to deliver test results on each build. Pretty easy right? 
+
+## Challenges
+### Challenge 1: Run the tests using a `docker-compose exec` command
+
+<details><summary>Answer</summary>
+<p>
+
+Start Django if it's not running
+
+```bash
+$ docker-compose up -d
+```
+
+Run the exec command
+
+```bash
+$ docker-compose exec web python manage.py test
+
+...
+..........
+----------------------------------------------------------------------
+Ran 10 tests in 0.174s
+
+OK
+Destroying test database for alias 'default'...
+```
+
+</p>
+</details>
+
+### Challenge 2: Run the Django site on a different local port (8001)
+
+<details><summary>Answer</summary>
+<p>
+
+Stop Django if it's running
+
+```bash
+$ docker-compose down
+
+Stopping django_web_1 ... 
+Stopping django_db_1  ...
+```
+
+Modify the `docker-compose.yml` file directly
+
+Change
+```yml
+    ports:
+      - "8000:8000"
+```
+
+to 
+
+```yml
+    ports:
+      - "8001:8000"
+```
+
+Then run `docker-compose up -d`.
+
+Once it's launched: 
+
+```bash
+$ curl http://localhost:8001
+
+<link rel="stylesheet" type="text/css" href="/static/polls/style.css" />
+...
+```
+
+</p>
+</details>
+
+### Challenge 3: Send the Database Logs to Elasticsearch
+
+> Hint: Compare the service definitions for `web` and `db` in [docker-compose.yml](Django/docker-compose.yml). What's different about them?
+
+
+<details><summary>Answer</summary>
+<p>
+
+The answer is in the labels. Add the following label to the db service:
+
+```yml
+...
+labels:
+      co.elastic.logs/enabled: true
+...
+```
+
+Then redeploy the service
+
+```bash
+$ docker-compose up -d
+
+...
+Recreating django_db_1 ... done
+django_web_1 is up-to-date
+```
+
+Now check [Kibana](http://localhost:5601/app/logs/stream?flyoutOptions=(flyoutId:!n,flyoutVisibility:hidden,surroundingLogsId:!n)&logFilter=(expression:%27container.labels.com_docker_compose_service%20:%20%22db%22%27,kind:kuery)&logPosition=(end:now,position:(tiebreaker:15300,time:1624992369249),start:now-1d,streamLive:!f)) for the logs. You should see lines like this: 
+
+![APM Overview](docs/db-logs.png)
+
+</p>
+</details>
+
+## Wrapping up
+
+### Clean up the environments
+
+Once you are done with everything, let's clean up your local containers so that you don't have these processes running in the background.
+
+#### Clean Django
+
+```bash
+$ cd ../Django
+$ docker-compose down -v  # remove any created volumes
+
+...
+Stopping django_db_1  ... done
+Stopping django_web_1 ... done
+Removing django_db_1  ... done
+Removing django_web_1 ... done
+Removing network django_default
+```
+
+#### Clean the Elastic Stack
+
+```bash
+$ cd ../Elk
+$ docker-compose down -v  # remove any created volumes
+
+...
+Stopping kib              ... done
+Stopping elk_apm-server_1 ... done
+Stopping filebeat         ... done
+Stopping es               ... done
+Removing kib              ... done
+Removing elk_apm-server_1 ... done
+Removing filebeat         ... done
+Removing es               ... done
+Removing network elk_elastic
+Removing volume elk_esdata
+Removing volume elk_fbdata
+```
+
+### Fun Docker Containers
+
+I run these using docker-compose at my house on a Synology NAS.
+
+- Run GitLab (opensource github clone): https://docs.gitlab.com/omnibus/docker/
+- Add non-HomeKit items to Apple Home: https://github.com/oznu/docker-homebridge
+- Minecraft Server: https://hub.docker.com/r/roemer/bedrock-server
+- ARK Server: https://hub.docker.com/r/boerngenschmidt/ark-docker/
+- Download photos in iCloud: https://hub.docker.com/r/boredazfcuk/icloudpd
+- Run a Plex server: https://hub.docker.com/r/linuxserver/plex
+
+### Final Thought
+
+> Hopefully this was a fun excercise to go through in order to get more familiar with docker and compose. The sky is the limit with what you can do by chaining docker-containers together. What will you create using compose? How can you incorporate compose into your development environments? 
