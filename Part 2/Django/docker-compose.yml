@@ -1,0 +1,29 @@
+version: "3.9"
+   
+services:
+  db:
+    image: postgres
+    labels:
+      co.elastic.logs/enabled: true
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+  web:
+    build: .
+    labels:
+      co.elastic.logs/enabled: true
+      co.elastic.logs/json.keys_under_root: true
+      co.elastic.logs/json.add_error_key: true
+      co.elastic.logs/json.message_key: message
+    volumes:
+      - .:/code
+    environment:
+      ELASTIC_APM_ENABLED: "false"
+      ELASTIC_APM_SERVICE_NAME: bootcamp-django
+    ports:
+      - "8001:8000"
+    depends_on:
+      - db

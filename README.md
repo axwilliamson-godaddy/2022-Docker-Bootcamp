@@ -2,55 +2,57 @@
 
 <!-- TOC -->
 
-  - [Introduction to Docker](#introduction-to-docker)
-      - [What is Docker?](#what-is-docker)
-      - [Why use Docker?](#why-use-docker)
-      - [What does a Docker Image look like?](#what-does-a-docker-image-look-like)
-  - [How do I use Docker images?](#how-do-i-use-docker-images)
-      - [Pull the Redis image](#pull-the-redis-image)
-      - [Inspect the Redis image](#inspect-the-redis-image)
-  - [Deploying an Open Source image](#deploying-an-open-source-image)
-      - [Create Redis container](#create-redis-container)
-      - [View Redis in container list](#view-redis-in-container-list)
-      - [Check Redis Logs](#check-redis-logs)
-      - [Store data in Redis](#store-data-in-redis)
-      - [Get data from Redis](#get-data-from-redis)
-      - [Stop Redis container](#stop-redis-container)
-      - [Try to get data again](#try-to-get-data-again)
-      - [Start the stopped Redis container](#start-the-stopped-redis-container)
-      - [Try to get data again data is preserved](#try-to-get-data-again-data-is-preserved)
-      - [Remove Redis container](#remove-redis-container)
-      - [Recreate and see that the data doesn't exist anymore](#recreate-and-see-that-the-data-doesnt-exist-anymore)
-  - [Using Docker Volumes to preserve container data](#using-docker-volumes-to-preserve-container-data)
-      - [Create Redis data volume](#create-redis-data-volume)
-      - [Recreate Redis container, using a docker volume](#recreate-redis-container-using-a-docker-volume)
-      - [Enter Redis container, using interactive session](#enter-redis-container-using-interactive-session)
-      - [Delete Redis container](#delete-redis-container)
-      - [Recreate the Redis container, using the same docker volume](#recreate-the-redis-container-using-the-same-docker-volume)
-      - [Validate data persistence](#validate-data-persistence)
-  - [Create custom Docker images](#create-custom-docker-images)
-      - [Build our image](#build-our-image)
-      - [Run our image](#run-our-image)
-          - [Run our image with a different CMD](#run-our-image-with-a-different-cmd)
-      - [Connect Docker Containers](#connect-docker-containers)
-          - [docker network create](#docker-network-create)
-          - [docker network connect](#docker-network-connect)
-          - [docker inspect redis](#docker-inspect-redis)
-          - [docker run --net](#docker-run---net)
-      - [Talking to Redis](#talking-to-redis)
-          - [Run a single command](#run-a-single-command)
-          - [Run a command that creates a shell](#run-a-command-that-creates-a-shell)
-              - [Validate the stored data](#validate-the-stored-data)
-  - [Speeding things up with Docker Compose](#speeding-things-up-with-docker-compose)
-      - [docker-compose files](#docker-compose-files)
-      - [docker-compose cli](#docker-compose-cli)
-          - [docker-compose up](#docker-compose-up)
-          - [docker-compose ps](#docker-compose-ps)
-          - [docker-compose exec](#docker-compose-exec)
-              - [Side note](#side-note)
-              - [Living inside a container](#living-inside-a-container)
-          - [docker-compose down](#docker-compose-down)
-  - [Final Thoughts](#final-thoughts)
+- [Bootcamp CI/CD & Docker pt. 1](#bootcamp-cicd--docker-pt-1)
+    - [Introduction to Docker](#introduction-to-docker)
+        - [What is Docker?](#what-is-docker)
+        - [Why use Docker?](#why-use-docker)
+        - [What does a Docker Image look like?](#what-does-a-docker-image-look-like)
+    - [How do I use Docker images?](#how-do-i-use-docker-images)
+        - [Install Docker](#install-docker)
+        - [Pull the Redis image](#pull-the-redis-image)
+        - [Inspect the Redis image](#inspect-the-redis-image)
+    - [Deploying an Open Source image](#deploying-an-open-source-image)
+        - [Create Redis container](#create-redis-container)
+        - [View Redis in container list](#view-redis-in-container-list)
+        - [Check Redis Logs](#check-redis-logs)
+        - [Store data in Redis](#store-data-in-redis)
+        - [Get data from Redis](#get-data-from-redis)
+        - [Stop Redis container](#stop-redis-container)
+        - [Try to get data again](#try-to-get-data-again)
+        - [Start the stopped Redis container](#start-the-stopped-redis-container)
+        - [Try to get data again data is preserved](#try-to-get-data-again-data-is-preserved)
+        - [Remove Redis container](#remove-redis-container)
+        - [Recreate and see that the data doesn't exist anymore](#recreate-and-see-that-the-data-doesnt-exist-anymore)
+    - [Using Docker Volumes to preserve container data](#using-docker-volumes-to-preserve-container-data)
+        - [Create Redis data volume](#create-redis-data-volume)
+        - [Recreate Redis container, using a docker volume](#recreate-redis-container-using-a-docker-volume)
+        - [Enter Redis container, using interactive session](#enter-redis-container-using-interactive-session)
+        - [Delete Redis container](#delete-redis-container)
+        - [Recreate the Redis container, using the same docker volume](#recreate-the-redis-container-using-the-same-docker-volume)
+        - [Validate data persistence](#validate-data-persistence)
+    - [Create custom Docker images](#create-custom-docker-images)
+        - [Build our image](#build-our-image)
+        - [Run our image](#run-our-image)
+            - [Run our image with a different CMD](#run-our-image-with-a-different-cmd)
+        - [Connect Docker Containers](#connect-docker-containers)
+            - [docker network create](#docker-network-create)
+            - [docker network connect](#docker-network-connect)
+            - [docker inspect redis](#docker-inspect-redis)
+            - [docker run --net](#docker-run---net)
+        - [Talking to Redis](#talking-to-redis)
+            - [Run a single command](#run-a-single-command)
+            - [Run a command that creates a shell](#run-a-command-that-creates-a-shell)
+                - [Validate the stored data](#validate-the-stored-data)
+    - [Speeding things up with Docker Compose](#speeding-things-up-with-docker-compose)
+        - [docker-compose files](#docker-compose-files)
+        - [docker-compose cli](#docker-compose-cli)
+            - [docker-compose up](#docker-compose-up)
+            - [docker-compose ps](#docker-compose-ps)
+            - [docker-compose exec](#docker-compose-exec)
+                - [Side note](#side-note)
+                - [Living inside a container](#living-inside-a-container)
+            - [docker-compose down](#docker-compose-down)
+    - [Final Thoughts](#final-thoughts)
 
 <!-- /TOC -->
 
@@ -107,6 +109,35 @@ CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
 Each image is different in terms of how you configure the specifics for the application running inside. What's common though, is _how_ you configure the containers. Most images are configured using environment variables and/or by mounting a local Docker volume with configuration files present. 
 
 Let's look at Redis, as it's a very popular and useful key-value store and caching solution.
+
+### Install Docker
+To [install Docker](https://docs.docker.com/docker-for-mac/install/), download the DMG file from: https://desktop.docker.com/mac/stable/amd64/Docker.dmg
+
+From their docs:
+
+1. Double-click `Docker.dmg` to open the installer, then drag the Docker icon to
+    the Applications folder.
+
+      ![Install Docker app](https://docs.docker.com/docker-for-mac/images/docker-app-drag.png)
+
+2. Double-click `Docker.app` in the Applications folder to start Docker. (In the example below, the Applications folder is in "grid" view mode.)
+
+    ![Docker app in Hockeyapp](https://docs.docker.com/docker-for-mac/images/docker-app-in-apps.png)
+
+    The Docker menu in the top status bar indicates that Docker Desktop is running, and accessible from a terminal.
+
+      ![Whale in menu bar](https://docs.docker.com/docker-for-mac/images/whale-in-menu-bar.png)
+
+    If you've just installed the app, Docker Desktop launches the onboarding tutorial. The tutorial includes a simple exercise to build an example Docker image, run it as a container, push and save the image to Docker Hub.
+
+    ![Docker Quick Start tutorial](https://docs.docker.com/docker-for-mac/images/docker-tutorial-mac.png)
+
+3. Click the Docker menu (![whale menu](https://docs.docker.com/docker-for-mac/images/whale-x.png)) to see
+**Preferences** and other options.
+
+4. Select **About Docker** to verify that you have the latest version.
+
+Congratulations! You are now successfully running Docker Desktop.
 
 ### Pull the Redis image
 
