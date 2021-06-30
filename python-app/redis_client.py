@@ -2,7 +2,7 @@ import fire
 from redis import Redis
 import os
 
-REDIS_HOST = os.environ.get("REDIS_HOST", "redis")
+REDIS_HOST = os.environ.get("REDIS_HOST", "cache")
 
 data = {}
 
