@@ -29,6 +29,8 @@ services:
             context: .
         networks: 
             - redis
+        environment: 
+            REDIS_HOST: cache
         entrypoint: "/bin/sh"
         tty: yes
         healthcheck:
