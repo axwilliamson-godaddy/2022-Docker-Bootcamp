@@ -77,6 +77,11 @@ services:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   web:
     build: .
     volumes:
@@ -87,12 +92,13 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 ```
 
-The first service created is the postgress database. This allows our Django site to store and maintain it's application state. In this example, we simply use a local directory (via `volumes`) for it's database storage, and you'll see that created automatically for you by compose. We also pass through some environment variables which represent how we connect to the postgress database from Django.
+The first service created is the Postgres database. This allows our Django site to store and maintain it's application state. In this example, we simply use a local directory (via `volumes`) for its database storage, and you'll see that created automatically for you by compose. We also pass through some environment variables which represent how we connect to the postgress database from Django. We have added a healthcheck for this service so that our UI doesn't start up before it's database is ready.
 
- The second service is our [Django application](Django/). We use the `volumes` declaration to mount our Django code into the container. This allows us to make changes to the website code files, and have them reflected immediately via Django's autoreload mechanism.
+The second service is our [Django application](Django/). We use the `volumes` declaration to mount our Django code into the container. This allows us to make changes to the website code files, and have them reflected immediately via Django's autoreload mechanism. We also specify that we depend on the postgres service, by adding the `condition: service_healthy` flag under the `depends_on` section.
 
 #### Deploy Django Service
 
