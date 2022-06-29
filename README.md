@@ -23,7 +23,7 @@
     + [Try to get data again (data is preserved)](#try-to-get-data-again--data-is-preserved-)
     + [Remove Redis container](#remove-redis-container)
     + [Recreate and see that the data doesn't exist anymore](#recreate-and-see-that-the-data-doesn-t-exist-anymore)
-  * [Using [Docker Volumes](https://docs.docker.com/storage/volumes/) to preserve container data](#using--docker-volumes--https---docsdockercom-storage-volumes---to-preserve-container-data)
+  * [Using Docker Volumes to preserve container data](#using-docker-volumes-to-preserve-container-data)
     + [Create Redis data volume](#create-redis-data-volume)
     + [Recreate Redis container, using a docker volume](#recreate-redis-container--using-a-docker-volume)
     + [Enter Redis container, using interactive session](#enter-redis-container--using-interactive-session)
