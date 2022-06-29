@@ -640,9 +640,66 @@ $ docker-compose down
 
 > As you can see, docker compose drastically reduces development time while allowing the same features as the CLI.
 
+## Incorporating Visual Studio Code 
+
+IDEs like PyCharm and Visual Studio Code can make use of docker to provide a fresh development environment for all people on your team.
+
+### Installing
+
+#### Mac Users
+
+Install Brew (if needed):
+
+```bash
+$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+Have Brew install VSCode
+
+```bash
+$ brew install --cask visual-studio-code
+```
+
+#### Windows Users
+
+Install from this link: https://code.visualstudio.com/download
+
+### Install VSCode dependencies
+
+1. Run VSCode
+2. Open the `Extensions` section of VSCode
+3. Install the Docker extension (ms-azuretools.vscode-docker)
+4. Install the Remote-Containers extension (ms-vscode-remote.remote-containers)
+
+### Build & Run our development container
+
+```bash
+$ docker-compose build
+
+...
+ => => exporting layers                                                                                                                                                                                                                                                                                            0.0s
+ => => writing image sha256:3cf82f189fc4a35542fc08a1663fe35a4f2e7262db398e041fa3c16839f7af57                                                                                                                                                                                                                       0.0s
+ => => naming to docker.io/library/redis_app
+```
+
+If we put this image name in our `.devcontainer/devcontainer.json` file, we are able to use this image as a development environment.
+
+Now in VSCode, in the bottom left, we should see a green button that looks like two arrows. Click on this button and find `Reopen in Containers...` in the dropdown and select it. A new window will pop-up to provide an isolated development environment.
+
+### Run our Python code inside the container
+1. Install the Python extension (ms-python.python) by clicking "Install into dev container"
+2. Click on the `Run and Debug` section in VSCode
+3. Click on the `Run` button and you should see output similar to:
+```bash
+root@63f708f87d17:/workspaces/2021-Bootcamp-Docker#  cd /workspaces/2021-Bootcamp-Docker ; /usr/bin/env /usr/local/bin/python /root/.vscode-server/extensions/ms-python.python-2022.8.1/pythonFiles/lib/python/debugpy/launcher 33635 -- /workspaces/2021-Bootcamp-Docker/python-app/redis_client.py hello_world 
+Oh hai
+```
+
+How does this work? VSCode has a `.vscode/launch.json` file that you can add run configurations into. This is extremely powerful and dynamic and will allow you to run most workloads right in VSCode.
+
 ## Final Thoughts
 
-By going through this excercise, you should have a better idea of what Docker is and what kinds of things you can do with it. There is so much more to explore, here are just a few things that i've found fun while working with it:
+By going through this exercise, you should have a better idea of what Docker is and what kinds of things you can do with it. There is so much more to explore, here are just a few things that i've found fun while working with it:
 
 - You can run Docker inside Docker (woah).
   - Very useful for CI/CD, since the runner can be containerized but it can also create other containers.

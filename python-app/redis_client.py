@@ -35,6 +35,10 @@ def get_redis_client():
     return redis_client
 
 
+def hello_world():
+    print("Oh hai")
+
+
 def check_redis():
     c = get_redis_client()
     if c:
@@ -51,5 +55,6 @@ if __name__ == '__main__':
     fire.Fire(dict(
         store_data=store_data,
         get_data=get_data,
-        check_redis=check_redis
+        check_redis=check_redis,
+        hello_world=hello_world
     ))
