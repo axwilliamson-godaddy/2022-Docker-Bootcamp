@@ -1,4 +1,4 @@
-# 2021 Bootcamp CI/CD & Docker (pt. 1)
+# 2022 Bootcamp CI/CD & Docker (pt. 1)
 
 <!-- TOC -->
 
@@ -118,21 +118,21 @@ From their docs:
 1. Double-click `Docker.dmg` to open the installer, then drag the Docker icon to
     the Applications folder.
 
-      ![Install Docker app](https://docs.docker.com/docker-for-mac/images/docker-app-drag.png)
+      ![Install Docker app](https://docs.docker.com/desktop/mac/images/docker-app-drag.png)
 
 2. Double-click `Docker.app` in the Applications folder to start Docker. (In the example below, the Applications folder is in "grid" view mode.)
 
-    ![Docker app in Hockeyapp](https://docs.docker.com/docker-for-mac/images/docker-app-in-apps.png)
+    ![Docker app in Hockeyapp](https://docs.docker.com/desktop/mac/images/docker-app-in-apps.png)
 
     The Docker menu in the top status bar indicates that Docker Desktop is running, and accessible from a terminal.
 
-      ![Whale in menu bar](https://docs.docker.com/docker-for-mac/images/whale-in-menu-bar.png)
+      ![Whale in menu bar](https://docs.docker.com/desktop/mac/images/whale-in-menu-bar.png)
 
     If you've just installed the app, Docker Desktop launches the onboarding tutorial. The tutorial includes a simple exercise to build an example Docker image, run it as a container, push and save the image to Docker Hub.
 
-    ![Docker Quick Start tutorial](https://docs.docker.com/docker-for-mac/images/docker-tutorial-mac.png)
+    ![Docker Quick Start tutorial](https://docs.docker.com/desktop/mac/images/docker-tutorial-mac.png)
 
-3. Click the Docker menu (![whale menu](https://docs.docker.com/docker-for-mac/images/whale-x.png)) to see
+3. Click the Docker menu (![whale menu](https://docs.docker.com/desktop/mac/images/whale-x.png)) to see
 **Preferences** and other options.
 
 4. Select **About Docker** to verify that you have the latest version.

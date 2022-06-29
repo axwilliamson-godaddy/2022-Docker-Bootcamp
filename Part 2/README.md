@@ -1,4 +1,4 @@
-# 2021 Bootcamp CI/CD & Docker (pt. 2)
+# 2022 Bootcamp CI/CD & Docker (pt. 2)
 
 <!-- TOC -->
 
