@@ -2,10 +2,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            "name": "Run hello world",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "python-app/redis_client.py",
             "console": "integratedTerminal",
             "args": ["hello_world"]
         }

@@ -694,13 +694,13 @@ If we put this image name in our `.devcontainer/devcontainer.json` file, we are 
 Now in VSCode, in the bottom left, we should see a green button that looks like two arrows. Click on this button and find `Reopen in Containers...` in the dropdown and select it. A new window will pop-up to provide an isolated development environment.
 
 ### Run our Python code inside the container
-1. Install the Python extension (ms-python.python) by clicking "Install into dev container"
-2. Click on the `Run and Debug` section in VSCode
-3. Click on the `Run` button and you should see output similar to:
+1. Click on the `Run and Debug` section in VSCode
+2. Click on the `Run` button and you should see output similar to:
 ```bash
-root@63f708f87d17:/workspaces/2021-Bootcamp-Docker#  cd /workspaces/2021-Bootcamp-Docker ; /usr/bin/env /usr/local/bin/python /root/.vscode-server/extensions/ms-python.python-2022.8.1/pythonFiles/lib/python/debugpy/launcher 33635 -- /workspaces/2021-Bootcamp-Docker/python-app/redis_client.py hello_world 
+root@a368d1296c1e:/workspaces/2021-Bootcamp-Docker#  cd /workspaces/2021-Bootcamp-Docker ; /usr/bin/env /usr/local/bin/python /root/.vscode-server/extensions/ms-python.python-2022.8.1/pythonFiles/lib/python/debugpy/launcher 46805 -- python-app/redis_client.py hello_world 
 Oh hai
 ```
+3. If you want to experiement more, add a breakpoint to the hello_world method and it should stop on that line next time you run.
 
 How does this work? VSCode has a `.vscode/launch.json` file that you can add run configurations into. This is extremely powerful and dynamic and will allow you to run most workloads right in VSCode.
 
