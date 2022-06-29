@@ -85,23 +85,23 @@ Essentially,
 Let's take a look at the [Docker docs](https://docs.docker.com/language/python/build-images/#create-a-dockerfile-for-python) for creating a `Dockerfile` for a python application.
 
 ```Docker
-FROM python:3.8-slim-buster
 # What is our base image? Since we want to create a python application, we need a base image that has python. Luckily, we can continue making use of open-source images for this as well. There are many types of images that provide python, but for this example i'll choose 
+FROM python:3.8-slim-buster
 
-WORKDIR /app
 # What directory (inside the container) should we be working from?
+WORKDIR /app
 
-COPY requirements.txt requirements.txt
 # Copy over the project requirements
+COPY requirements.txt requirements.txt
 
-RUN pip3 install -r requirements.txt
 # Run a command to install the requirements
+RUN pip3 install -r requirements.txt
 
-COPY . .
 # Copy over the rest of the app
+COPY . .
 
+# The command for the container. If this command exits, the container exits.
 CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
-# What should the main command of this container be? If this command exits, the container exits.
 ```
 
 ## How do I use Docker images?
@@ -596,7 +596,7 @@ total 16
 ```
 
 ##### Living inside a container
-Now you are inside of the container, feel free to take a look around. When you are ready, run the `ENTRYPOINT` command:
+Now you are inside the container, feel free to take a look around. When you are ready, run the `ENTRYPOINT` command:
 
 ```
 $ python redis_client.py
